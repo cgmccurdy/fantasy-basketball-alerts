@@ -1,6 +1,7 @@
 # fantasy-basketball-alerts
 
-Currently works with Sleeper. Enter your Sleeper username and IFTTT key in the script.
+Currently works with Sleeper. Enter your Sleeper username and IFTTT key in the script. Will run on all NBA leagues on your account.
+Supported scoring settings: PTS, REB, AST, STL, BLK, TOV, Double Doubles, Triple Doubles.
 
 To get an IFTTT key, sign-up for an IFTTT account. Retrieve your key from the link below by clicking on "Documentation".
 https://ifttt.com/maker_webhooks
