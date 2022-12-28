@@ -12,7 +12,7 @@ Enter "sleeper_alert" as the Event Name.
 For "Then" choose "Notifcations" and select "Send a rich notification from the IFTTT app".  
 For Message use "Add Ingredient" to input "Value2"  
 For Title use "Add Ingredient" to input "Value1"  
-For Link URL input "https://sleeper.com" (Trying to figure out a URL that will open the Sleeper app directly)
+For Link URL input "sleeperbot://" (This is for iOS. I'm not sure what the URL to open the Sleeper app is on Android.)
 
 Use Windows Task Scheduler or Cron on Mac to automate running the script daily:  
 https://towardsdatascience.com/how-to-easily-automate-your-python-scripts-on-mac-and-windows-459388c9cc94
