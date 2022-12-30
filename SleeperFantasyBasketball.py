@@ -4,12 +4,12 @@ import json
 import time
 from datetime import datetime, date, timedelta
 
-# Enter your Sleeper username
+# Enter your Sleeper username and IFTTT Key
 # Set time_offset to 0 for ET, 1 for CT, 2 for MT, 3 for PT
 # Set ir_notifcations to True to receive notifications for players in IR slots
 
 user_name = 'enter_username'
-IFTTT = 'enter_IFTTT_key'
+IFTTT = 'enter_ifttt_key'
 time_offset = 1
 ir_notifcations = False
 
@@ -21,6 +21,7 @@ def ifttt(first, second, third):
     requests.post("https://maker.ifttt.com/trigger/sleeper_alert/with/key/"+IFTTT, data=report) 
 
 today = date.today()
+today_str = str(today)
 yesterdaydate  = today - timedelta(days = 1)
 yesterdayformat = yesterdaydate.strftime("%m/%d/%Y")
 
@@ -38,6 +39,21 @@ if isExist == False or is_file_older_than_x_days(file) == True:
     with open('playercache.json', "w") as f:
         f.write(json_object)
 
+from nba_api.stats.static import players
+from nba_api.stats.library.parameters import Season
+from nba_api.stats.endpoints import leaguedashplayerstats
+
+last3games = leaguedashplayerstats.LeagueDashPlayerStats(season=Season.current_season,last_n_games=3,per_mode_detailed='PerGame').get_normalized_json()
+last3object = json.loads(last3games)
+last3stats = last3object['LeagueDashPlayerStats']
+
+yesterdaydata = leaguedashplayerstats.LeagueDashPlayerStats(season=Season.current_season,date_from_nullable=yesterdayformat,per_mode_detailed='PerGame').get_normalized_json()
+yesterdayobject = json.loads(yesterdaydata)
+yesterdaystats = yesterdayobject['LeagueDashPlayerStats']
+
+gamesdata = requests.get("https://www.balldontlie.io/api/v1/games?start_date="+today_str+"&end_date="+today_str).json()
+games = gamesdata['data']
+
 state = requests.get("https://api.sleeper.app/v1/state/nba").json()
 season = state['season']
 week = str(state['week'])
@@ -49,6 +65,7 @@ avatar = 'https://sleepercdn.com/avatars/'+user['avatar']
 trendingdata = requests.get("https://api.sleeper.app/v1/players/nba/trending/add?lookback_hours=12&limit=45").json()
 
 leagues = requests.get("https://api.sleeper.app/v1/user/"+userid+"/leagues/nba/"+season).json()
+
 for league in leagues:
     leagueid = league['league_id']
     leaguename = league['name']
@@ -80,8 +97,8 @@ for league in leagues:
                 reserves_ir = list(set(starters).symmetric_difference(set(roster)))
                 reserves = list(set(ir).symmetric_difference(set(reserves_ir)))
         current_roster = rosters['players']
-        for players in current_roster:
-            all_rostered.append(players)
+        for player in current_roster:
+            all_rostered.append(player)
 
     prospects = []
     for player in trendingdata:
@@ -140,18 +157,6 @@ for league in leagues:
         player_name.append(name)
         player_name.append('prospect')
         player_names.append(player_name)
-
-    from nba_api.stats.static import players
-    from nba_api.stats.library.parameters import Season
-    from nba_api.stats.endpoints import leaguedashplayerstats
-
-    last3games = leaguedashplayerstats.LeagueDashPlayerStats(season=Season.current_season,last_n_games=3,per_mode_detailed='PerGame').get_normalized_json()
-    last3object = json.loads(last3games)
-    last3stats = last3object['LeagueDashPlayerStats']
-
-    yesterdaydata = leaguedashplayerstats.LeagueDashPlayerStats(season=Season.current_season,date_from_nullable=yesterdayformat,per_mode_detailed='PerGame').get_normalized_json()
-    yesterdayobject = json.loads(yesterdaydata)
-    yesterdaystats = yesterdayobject['LeagueDashPlayerStats']
 
     for player in player_names:
         player_name = player[0]
@@ -219,6 +224,7 @@ for league in leagues:
                             percentdiffstr = str(percentdiff)
                             gamesplayedstr = str(gamesplayed)
                             fplast3str = str(fplast3)
+                            minutestr = str(minutes)
 
                             if player[1] == 'myteam' and len(player) == 2:
                                 alert = 'Great game from '+player_name+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
@@ -227,15 +233,10 @@ for league in leagues:
                             elif player[1] == 'opponent':
                                 alert = "Oof! "+player_name+" on "+opponent_team_name+"'s team dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+"."
                             elif player[1] == 'prospect':
-                                alert = player_name+" is trending and dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+"."    
+                                alert = player_name+" is trending and dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+" playing "+minutestr+" MPG."
                             
-                            print(alert)
+                            print('Alert: '+alert)
                             ifttt(alert, leaguename, avatar)
-
-
-    today_str = str(today)
-    data = requests.get("https://www.balldontlie.io/api/v1/games?start_date="+today_str+"&end_date="+today_str).json()
-    games = data['data']
 
     for player in reserve_players:
         for game in games:
@@ -251,5 +252,5 @@ for league in leagues:
                 
                 alert = player[0]+' is on the bench and has a game today at '+gamestartfinal+'.'
 
-                print(alert)
+                print('Alert: '+alert)
                 ifttt(alert, leaguename, avatar)
