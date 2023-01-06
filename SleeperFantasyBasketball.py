@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 # Set ir_notifcations to True to receive notifications for players in IR slots
 
 user_name = 'enter_username'
-IFTTT = 'enter_ifttt_key'
+IFTTT = 'enter_IFTTT_key'
 time_offset = 1
 ir_notifcations = False
 
@@ -54,15 +54,15 @@ yesterdaystats = yesterdayobject['LeagueDashPlayerStats']
 gamesdata = requests.get("https://www.balldontlie.io/api/v1/games?start_date="+today_str+"&end_date="+today_str).json()
 games = gamesdata['data']
 
-state = requests.get("https://api.sleeper.app/v1/state/nba").json()
-season = state['season']
-week = str(state['week'])
+seasonstatus = requests.get("https://api.sleeper.app/v1/state/nba").json()
+season = seasonstatus['season']
+week = str(seasonstatus['week'])
 
 user = requests.get("https://api.sleeper.app/v1/user/"+user_name).json()
 userid = user['user_id']
 avatar = 'https://sleepercdn.com/avatars/'+user['avatar']
 
-trendingdata = requests.get("https://api.sleeper.app/v1/players/nba/trending/add?lookback_hours=12&limit=45").json()
+trendingdata = requests.get("https://api.sleeper.app/v1/players/nba/trending/add?lookback_hours=12&limit=100").json()
 
 leagues = requests.get("https://api.sleeper.app/v1/user/"+userid+"/leagues/nba/"+season).json()
 
@@ -219,7 +219,7 @@ for league in leagues:
 
                         print(player_name+' finished')
 
-                        if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 30 and player[1] == 'prospect'):
+                        if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 25 and player[1] == 'prospect'):
                             fantasypointsstr = str(fantasypoints)
                             percentdiffstr = str(percentdiff)
                             gamesplayedstr = str(gamesplayed)
