@@ -7,9 +7,9 @@ https://ifttt.com/maker_webhooks
 
 Alerts will generate for:  
 - Big games from players on your team  
-- Big games for players on current matchup's team  
+- Big games from players on matchup's team  
+- Big games from available trending players  
 - A player on the bench who has a game that day  
-- Trending players  
 
 Supported scoring settings: PTS, REB, AST, STL, BLK, TOV, Double Doubles, Triple Doubles.  
 
