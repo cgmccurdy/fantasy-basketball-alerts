@@ -185,7 +185,7 @@ for league in leagues:
                 else:
                     td = 0
                 
-                fantasypoints = pts + ast + reb + stl + blk + to + dd + td
+                fantasypoints = round(pts + ast + reb + stl + blk + to + dd + td, 1)
 
                 for log in last3stats:
                     if id == log['PLAYER_ID']:
