@@ -1,10 +1,4 @@
-import requests
-import os
-import json
-import time
-from datetime import datetime, date, timedelta
-
-# Enter your Sleeper username and IFTTT Key
+# Enter your Sleeper username and IFTTT Key below
 # Set time_offset to 0 for ET, 1 for CT, 2 for MT, 3 for PT
 # Set ir_notifcations to True to receive notifications for players in IR slots
 
@@ -12,6 +6,18 @@ user_name = 'enter_username'
 IFTTT = 'enter_IFTTT_key'
 time_offset = 1
 ir_notifcations = False
+
+import requests
+import os
+import json
+import time
+from datetime import datetime, date, timedelta
+from dotenv import load_dotenv, find_dotenv
+
+if user_name == 'enter_username':
+    load_dotenv(find_dotenv())
+    user_name = os.getenv('sleeper_username')
+    IFTTT = os.getenv('IFTTT_key')
 
 def ifttt(first, second, third):
     report = {}

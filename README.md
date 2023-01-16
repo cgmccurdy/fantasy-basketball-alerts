@@ -1,6 +1,6 @@
 # fantasy-basketball-alerts
 
-Currently works with Sleeper. Enter your Sleeper username and IFTTT key in the script.  
+Works with Sleeper. Enter your Sleeper username and IFTTT key in the python file.  
 
 To get an IFTTT key, sign-up for an IFTTT account. Retrieve your key from the link below by clicking on "Documentation".  
 https://ifttt.com/maker_webhooks  
@@ -12,6 +12,7 @@ Alerts will generate for:
 - A player on the bench who has a game that day  
 
 Supported scoring settings: PTS, REB, AST, STL, BLK, TOV, Double Doubles, Triple Doubles.  
+Player cache refreshed every 7 days.  
 
 IFTTT Setup:  
 - Create an applet  
