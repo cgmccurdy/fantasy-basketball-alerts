@@ -166,83 +166,90 @@ for league in leagues:
 
     for player in player_names:
         player_name = player[0]
-        id = players.find_players_by_full_name(player_name)[0]['id']
-        for log in yesterdaystats:
-            if id == log['PLAYER_ID']:
-                pts_raw = log['PTS']
-                ast_raw = log['AST']
-                reb_raw = log['REB']
-                pts = pts_raw * pts_setting
-                ast = ast_raw * ast_setting
-                reb = reb_raw * reb_setting
-                stl = log['STL'] * stl_setting
-                blk = log['BLK'] * blk_setting
-                to = log['TOV'] * to_setting
-                if pts_raw > 9 and ast_raw > 9:
-                    dd = dd_setting
-                elif pts_raw > 9 and reb_raw > 9:
-                    dd = dd_setting
-                elif ast_raw > 9 and reb_raw > 9:
-                    dd = dd_setting
-                else:
-                    dd = 0
-                if pts_raw > 9 and ast_raw > 9 and reb_raw > 9:
-                    td = td_setting
-                else:
-                    td = 0
-                
-                fantasypoints = round(pts + ast + reb + stl + blk + to + dd + td, 1)
+        search = players.find_players_by_full_name(player_name)
+        if search:
+            id = search[0]['id']
+            for log in yesterdaystats:
+                if id == log['PLAYER_ID']:
+                    pts_raw = log['PTS']
+                    ast_raw = log['AST']
+                    reb_raw = log['REB']
+                    pts = pts_raw * pts_setting
+                    ast = ast_raw * ast_setting
+                    reb = reb_raw * reb_setting
+                    stl = log['STL'] * stl_setting
+                    blk = log['BLK'] * blk_setting
+                    to = log['TOV'] * to_setting
+                    if pts_raw > 9 and ast_raw > 9:
+                        dd = dd_setting
+                    elif pts_raw > 9 and reb_raw > 9:
+                        dd = dd_setting
+                    elif ast_raw > 9 and reb_raw > 9:
+                        dd = dd_setting
+                    else:
+                        dd = 0
+                    if pts_raw > 9 and ast_raw > 9 and reb_raw > 9:
+                        td = td_setting
+                    else:
+                        td = 0
+                    
+                    fantasypoints = round(pts + ast + reb + stl + blk + to + dd + td, 1)
 
-                for log in last3stats:
-                    if id == log['PLAYER_ID']:
-                        gamesplayed = log['GP']
-                        minutes = log['MIN']
-                        pts_raw_last3 = log['PTS']
-                        ast_raw_last3 = log['AST']
-                        reb_raw_last3 = log['REB']
-                        pts_last3 = pts_raw_last3 * pts_setting
-                        ast_last3 = ast_raw_last3 * ast_setting
-                        reb_last3 = reb_raw_last3 * reb_setting
-                        stl_last3 = log['STL'] * stl_setting
-                        blk_last3 = log['BLK'] * blk_setting
-                        to_last3 = log['TOV'] * to_setting
-                        if pts_raw_last3 > 9 and ast_raw_last3 > 9:
-                            dd_last3 = dd_setting
-                        elif pts_raw_last3 > 9 and reb_raw_last3 > 9:
-                            dd_last3 = dd_setting
-                        elif ast_raw_last3 > 9 and reb_raw_last3 > 9:
-                            dd_last3 = dd_setting
-                        else:
-                            dd_last3 = 0
-                        if pts_raw_last3 > 9 and ast_raw_last3 > 9 and reb_raw_last3 > 9:
-                            td_last3 = td_setting
-                        else:
-                            td_last3 = 0
+                    for log in last3stats:
+                        if id == log['PLAYER_ID']:
+                            gamesplayed = log['GP']
+                            minutes = log['MIN']
+                            pts_raw_last3 = log['PTS']
+                            ast_raw_last3 = log['AST']
+                            reb_raw_last3 = log['REB']
+                            pts_last3 = pts_raw_last3 * pts_setting
+                            ast_last3 = ast_raw_last3 * ast_setting
+                            reb_last3 = reb_raw_last3 * reb_setting
+                            stl_last3 = log['STL'] * stl_setting
+                            blk_last3 = log['BLK'] * blk_setting
+                            to_last3 = log['TOV'] * to_setting
+                            if pts_raw_last3 > 9 and ast_raw_last3 > 9:
+                                dd_last3 = dd_setting
+                            elif pts_raw_last3 > 9 and reb_raw_last3 > 9:
+                                dd_last3 = dd_setting
+                            elif ast_raw_last3 > 9 and reb_raw_last3 > 9:
+                                dd_last3 = dd_setting
+                            else:
+                                dd_last3 = 0
+                            if pts_raw_last3 > 9 and ast_raw_last3 > 9 and reb_raw_last3 > 9:
+                                td_last3 = td_setting
+                            else:
+                                td_last3 = 0
 
-                        fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 0)
-                        
-                        percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
-
-                        print(player_name+' finished')
-
-                        if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 25 and player[1] == 'prospect'):
-                            fantasypointsstr = str(fantasypoints)
-                            percentdiffstr = str(percentdiff)
-                            gamesplayedstr = str(gamesplayed)
-                            fplast3str = str(fplast3)
-                            minutestr = str(minutes)
-
-                            if player[1] == 'myteam' and len(player) == 2:
-                                alert = 'Great game from '+player_name+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
-                            elif player[1] == 'myteam':
-                                alert = 'Great game from '+player[2]+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
-                            elif player[1] == 'opponent':
-                                alert = "Oof! "+player_name+" on "+opponent_team_name+"'s team dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+"."
-                            elif player[1] == 'prospect':
-                                alert = player_name+" is trending and dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+" playing "+minutestr+" MPG."
+                            fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 0)
                             
-                            print('Alert: '+alert)
-                            ifttt(alert, leaguename, avatar)
+                            percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
+
+                            if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 25 and player[1] == 'prospect'):
+                                fantasypointsstr = str(fantasypoints)
+                                percentdiffstr = str(percentdiff)
+                                gamesplayedstr = str(gamesplayed)
+                                fplast3str = str(fplast3)
+                                minutestr = str(minutes)
+
+                                if player[1] == 'myteam' and len(player) == 2:
+                                    alert = 'Great game from '+player_name+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
+                                elif player[1] == 'myteam':
+                                    alert = 'Great game from '+player[2]+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
+                                elif player[1] == 'opponent':
+                                    alert = "Oof! "+player_name+" on "+opponent_team_name+"'s team dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+"."
+                                elif player[1] == 'prospect':
+                                    alert = player_name+" is trending and dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+" playing "+minutestr+" MPG."
+                                
+                                print(alert)
+                                ifttt(alert, leaguename, avatar)
+
+                            else:
+                                print(player_name+' done')
+
+        else:
+            print(player_name+' not found')
+
 
     for player in reserve_players:
         for game in games:
