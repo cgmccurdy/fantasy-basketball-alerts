@@ -97,7 +97,7 @@ for league in leagues:
             starters = rosters['starters']
             ir = rosters['reserve']
             metadata = rosters['metadata']
-            if ir_notifcations == True:
+            if ir_notifcations == True or ir is None:
                 reserves = list(set(starters).symmetric_difference(set(roster)))
             else:
                 reserves_ir = list(set(starters).symmetric_difference(set(roster)))
@@ -224,6 +224,10 @@ for league in leagues:
                             fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 0)
                             
                             percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
+                            if percentdiff < 0:
+                                change = 'lower'
+                            else:
+                                change = 'higher'
 
                             if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 25 and player[1] == 'prospect'):
                                 fantasypointsstr = str(fantasypoints)
@@ -233,13 +237,13 @@ for league in leagues:
                                 minutestr = str(minutes)
 
                                 if player[1] == 'myteam' and len(player) == 2:
-                                    alert = 'Great game from '+player_name+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
+                                    alert = f'Great game from {player_name} with {fantasypointsstr} points! {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}.'
                                 elif player[1] == 'myteam':
-                                    alert = 'Great game from '+player[2]+' with '+fantasypointsstr+' points! '+percentdiffstr+'% higher than his last '+gamesplayedstr+' game average of '+fplast3str+'.'
+                                    alert = f'Great game from {player[2]} with {fantasypointsstr} points! {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}.'
                                 elif player[1] == 'opponent':
-                                    alert = "Oof! "+player_name+" on "+opponent_team_name+"'s team dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+"."
+                                    alert = f"Oof! {player_name} on {opponent_team_name}'s team dropped {fantasypointsstr} points. {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}."
                                 elif player[1] == 'prospect':
-                                    alert = player_name+" is trending and dropped "+fantasypointsstr+" points. "+percentdiffstr+"% higher than his last "+gamesplayedstr+" game average of "+fplast3str+" playing "+minutestr+" MPG."
+                                    alert = f"{player_name} is trending and dropped {fantasypointsstr} points. {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str} playing {minutestr} MPG."
                                 
                                 print(alert)
                                 ifttt(alert, leaguename, avatar)
@@ -263,7 +267,7 @@ for league in leagues:
                 else:
                     gamestartfinal = gamestart
                 
-                alert = player[0]+' is on the bench and has a game today at '+gamestartfinal+'.'
+                alert = f'{player[0]} is on the bench and has a game today at {gamestartfinal}.'
 
-                print('Alert: '+alert)
+                print(alert)
                 ifttt(alert, leaguename, avatar)
