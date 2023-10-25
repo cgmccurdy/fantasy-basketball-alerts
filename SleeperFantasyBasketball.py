@@ -6,6 +6,9 @@ user_name = 'enter_username'
 IFTTT = 'enter_IFTTT_key'
 time_offset = 1
 ir_notifcations = False
+prospect_alert_fantasy_points = 18
+good_game_alert_fantasy_points = 25
+huge_game_alert_fantasy_points = 40
 
 import requests
 import os
@@ -18,6 +21,7 @@ if user_name == 'enter_username':
     load_dotenv(find_dotenv())
     user_name = os.getenv('sleeper_username')
     IFTTT = os.getenv('IFTTT_key')
+    
 
 def ifttt(first, second, third):
     report = {}
@@ -138,10 +142,11 @@ for league in leagues:
             player_name.append(name)
             player_name.append('myteam')
             player_nickname_key = 'p_nick_'+player
-            if player_nickname_key in metadata and metadata[player_nickname_key] != '':
-                nickname = metadata[player_nickname_key]
-                player_name.append(nickname)
-            player_names.append(player_name)
+            if metadata != None:
+                if player_nickname_key in metadata and metadata[player_nickname_key] != '':
+                    nickname = metadata[player_nickname_key]
+                    player_name.append(nickname)
+                player_names.append(player_name)
     for player in reserves:
         if player != '0':
             reserve_player = []
@@ -229,7 +234,7 @@ for league in leagues:
                             else:
                                 change = 'higher'
 
-                            if (percentdiff > 20 and fantasypoints > 35 and player[1] != 'prospect') or (fantasypoints > 60) or (fplast3 > 25 and minutes > 24 and fantasypoints > 25 and player[1] == 'prospect'):
+                            if (percentdiff > 20 and fantasypoints > good_game_alert_fantasy_points and player[1] != 'prospect') or (fantasypoints > huge_game_alert_fantasy_points) or (fplast3 > prospect_alert_fantasy_points and fantasypoints > prospect_alert_fantasy_points and minutes > 24 and player[1] == 'prospect'):
                                 fantasypointsstr = str(fantasypoints)
                                 percentdiffstr = str(percentdiff)
                                 gamesplayedstr = str(gamesplayed)
@@ -258,9 +263,9 @@ for league in leagues:
     for player in reserve_players:
         for game in games:
             if player[1] == game['home_team']['abbreviation'] or player[1] == game['visitor_team']['abbreviation']:
-                gamestart_est = game['status']
-                stamp = datetime.strptime(gamestart_est[:-3], "%I:%M %p")
-                final_time = stamp - timedelta(hours=time_offset)
+                gamestart_utc = game['status']
+                stamp = datetime.strptime(gamestart_utc, '%Y-%m-%dT%H:%M:%SZ')
+                final_time = stamp - timedelta(hours=time_offset+4)
                 gamestart = final_time.strftime("%I:%M %p")
                 if gamestart[0] == '0':
                     gamestartfinal = gamestart[1:]
