@@ -176,27 +176,14 @@ for league in leagues:
             id = search[0]['id']
             for log in yesterdaystats:
                 if id == log['PLAYER_ID']:
-                    pts_raw = log['PTS']
-                    ast_raw = log['AST']
-                    reb_raw = log['REB']
-                    pts = pts_raw * pts_setting
-                    ast = ast_raw * ast_setting
-                    reb = reb_raw * reb_setting
+                    pts = log['PTS'] * pts_setting
+                    ast = log['AST'] * ast_setting
+                    reb = log['REB'] * reb_setting
                     stl = log['STL'] * stl_setting
                     blk = log['BLK'] * blk_setting
                     to = log['TOV'] * to_setting
-                    if pts_raw > 9 and ast_raw > 9:
-                        dd = dd_setting
-                    elif pts_raw > 9 and reb_raw > 9:
-                        dd = dd_setting
-                    elif ast_raw > 9 and reb_raw > 9:
-                        dd = dd_setting
-                    else:
-                        dd = 0
-                    if pts_raw > 9 and ast_raw > 9 and reb_raw > 9:
-                        td = td_setting
-                    else:
-                        td = 0
+                    dd = log['DD2'] * dd_setting
+                    td = log['TD3'] * td_setting
                     
                     fantasypoints = round(pts + ast + reb + stl + blk + to + dd + td, 1)
 
@@ -204,27 +191,14 @@ for league in leagues:
                         if id == log['PLAYER_ID']:
                             gamesplayed = log['GP']
                             minutes = log['MIN']
-                            pts_raw_last3 = log['PTS']
-                            ast_raw_last3 = log['AST']
-                            reb_raw_last3 = log['REB']
-                            pts_last3 = pts_raw_last3 * pts_setting
-                            ast_last3 = ast_raw_last3 * ast_setting
-                            reb_last3 = reb_raw_last3 * reb_setting
+                            pts_last3 = log['PTS'] * pts_setting
+                            ast_last3 = log['AST'] * ast_setting
+                            reb_last3 = log['REB'] * reb_setting
                             stl_last3 = log['STL'] * stl_setting
                             blk_last3 = log['BLK'] * blk_setting
                             to_last3 = log['TOV'] * to_setting
-                            if pts_raw_last3 > 9 and ast_raw_last3 > 9:
-                                dd_last3 = dd_setting
-                            elif pts_raw_last3 > 9 and reb_raw_last3 > 9:
-                                dd_last3 = dd_setting
-                            elif ast_raw_last3 > 9 and reb_raw_last3 > 9:
-                                dd_last3 = dd_setting
-                            else:
-                                dd_last3 = 0
-                            if pts_raw_last3 > 9 and ast_raw_last3 > 9 and reb_raw_last3 > 9:
-                                td_last3 = td_setting
-                            else:
-                                td_last3 = 0
+                            dd_last3 = log['DD2'] * dd_setting / gamesplayed
+                            td_last3 = log['TD3'] * td_setting / gamesplayed                        
 
                             fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 0)
                             
