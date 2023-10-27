@@ -146,7 +146,7 @@ for league in leagues:
                 if player_nickname_key in metadata and metadata[player_nickname_key] != '':
                     nickname = metadata[player_nickname_key]
                     player_name.append(nickname)
-                player_names.append(player_name)
+            player_names.append(player_name)
     for player in reserves:
         if player != '0':
             reserve_player = []
@@ -168,7 +168,7 @@ for league in leagues:
         player_name.append(name)
         player_name.append('prospect')
         player_names.append(player_name)
-
+    print(player_names)
     for player in player_names:
         player_name = player[0]
         search = players.find_players_by_full_name(player_name)
@@ -200,7 +200,7 @@ for league in leagues:
                             dd_last3 = log['DD2'] * dd_setting / gamesplayed
                             td_last3 = log['TD3'] * td_setting / gamesplayed                        
 
-                            fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 0)
+                            fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 1)
                             
                             percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
                             if percentdiff < 0:
