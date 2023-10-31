@@ -80,14 +80,82 @@ for league in leagues:
     leagueid = league['league_id']
     leaguename = league['name']
     scoring_settings = league['scoring_settings']
-    pts_setting = scoring_settings['pts']
-    ast_setting = scoring_settings['ast']
-    reb_setting = scoring_settings['reb']
-    stl_setting = scoring_settings['stl']
-    blk_setting = scoring_settings['blk']
-    to_setting = scoring_settings['to']
-    dd_setting = scoring_settings['dd']
-    td_setting = scoring_settings['td']
+    try:
+        pts_setting = scoring_settings['pts']
+    except:
+        pts_setting = 0
+    try:
+        ast_setting = scoring_settings['ast']
+    except:
+        ast_setting = 0
+    try:
+        reb_setting = scoring_settings['reb']
+    except:
+        reb_setting = 0
+    try:
+        stl_setting = scoring_settings['stl']
+    except:
+        stl_setting = 0
+    try:
+        blk_setting = scoring_settings['blk']
+    except:
+        blk_setting = 0
+    try:
+        to_setting = scoring_settings['to']
+    except:
+        to_setting = 0
+    try:
+        fgm_setting = scoring_settings['fgm']
+    except:
+        fgm_setting = 0
+    try:
+        fgmi_setting = scoring_settings['fgmi']
+    except:
+        fgmi_setting = 0
+    try:
+        ftm_setting = scoring_settings['ftm']
+    except:
+        ftm_setting = 0
+    try:
+        ftmi_setting = scoring_settings['ftmi']
+    except:
+        ftmi_setting = 0
+    try:
+        threes_setting = scoring_settings['tpm']
+    except:
+        threes_setting = 0
+    try:
+        dd_setting = scoring_settings['dd']
+    except:
+        dd_setting = 0
+    try:
+        td_setting = scoring_settings['td']
+    except:
+        td_setting = 0
+    try:
+        tech_setting = scoring_settings['tf']
+    except:
+        tech_setting = 0
+    try:
+        flagrant_setting = scoring_settings['ff']
+    except:
+        flagrant_setting = 0
+    try:
+        bonus_pts40_setting = scoring_settings['bonus_pt_40p']
+    except:
+        bonus_pts40_setting = 0
+    try:
+        bonus_pts50_setting = scoring_settings['bonus_pt_50p']
+    except:
+        bonus_pts50_setting = 0
+    try:
+        bonus_reb20_setting = scoring_settings['bonus_reb_20p']
+    except:
+        bonus_reb20_setting = 0
+    try:
+        bonus_ast15_setting = scoring_settings['bonus_ast_15p']
+    except:
+        bonus_ast15_setting = 0
 
     leagueusers = requests.get("https://api.sleeper.app/v1/league/"+leagueid+"/users").json()
 
@@ -168,7 +236,6 @@ for league in leagues:
         player_name.append(name)
         player_name.append('prospect')
         player_names.append(player_name)
-    print(player_names)
     for player in player_names:
         player_name = player[0]
         search = players.find_players_by_full_name(player_name)
@@ -182,10 +249,31 @@ for league in leagues:
                     stl = log['STL'] * stl_setting
                     blk = log['BLK'] * blk_setting
                     to = log['TOV'] * to_setting
+                    fgm = log['FGM'] * fgm_setting
+                    fgmi = (log['FGA'] - log['FGM']) * fgmi_setting
+                    ftm = log['FTM'] * ftm_setting
+                    ftmi = (log['FTA'] - log['FTM']) * ftmi_setting
+                    threes = log['FG3M'] * threes_setting
                     dd = log['DD2'] * dd_setting
                     td = log['TD3'] * td_setting
+                    if log['PTS'] > 39:
+                        bonus_pt_40p = bonus_pts40_setting
+                    else:
+                        bonus_pt_40p = 0
+                    if log['PTS'] > 49:
+                        bonus_pt_50p = bonus_pts50_setting
+                    else:
+                        bonus_pt_50p = 0
+                    if log['AST'] > 14:
+                        bonus_ast_15p = bonus_ast15_setting
+                    else:
+                        bonus_ast_15p = 0
+                    if log['REB'] > 19:
+                        bonus_reb_20p = bonus_reb20_setting
+                    else:
+                        bonus_reb_20p = 0
                     
-                    fantasypoints = round(pts + ast + reb + stl + blk + to + dd + td, 1)
+                    fantasypoints = round(pts + ast + reb + stl + blk + to + fgm + fgmi + ftm + ftmi + threes + dd + td + bonus_pt_40p + bonus_pt_50p + bonus_ast_15p + bonus_reb_20p, 1)
 
                     for log in last3stats:
                         if id == log['PLAYER_ID']:
@@ -197,10 +285,31 @@ for league in leagues:
                             stl_last3 = log['STL'] * stl_setting
                             blk_last3 = log['BLK'] * blk_setting
                             to_last3 = log['TOV'] * to_setting
+                            fgm_last3 = log['FGM'] * fgm_setting
+                            fgmi_last3 = (log['FGA'] - log['FGM']) * fgmi_setting
+                            ftm_last3 = log['FTM'] * ftm_setting
+                            ftmi_last3 = (log['FTA'] - log['FTM']) * ftmi_setting
+                            threes_last3 = log['FG3M'] * threes_setting
                             dd_last3 = log['DD2'] * dd_setting / gamesplayed
-                            td_last3 = log['TD3'] * td_setting / gamesplayed                        
+                            td_last3 = log['TD3'] * td_setting / gamesplayed
+                            if log['PTS'] > 39:
+                                bonus_pt_40p_last3 = bonus_pts40_setting
+                            else:
+                                bonus_pt_40p_last3 = 0
+                            if log['PTS'] > 49:
+                                bonus_pt_50p_last3 = bonus_pts50_setting
+                            else:
+                                bonus_pt_50p_last3 = 0
+                            if log['AST'] > 14:
+                                bonus_ast_15p_last3 = bonus_ast15_setting
+                            else:
+                                bonus_ast_15p_last3 = 0
+                            if log['REB'] > 19:
+                                bonus_reb_20p_last3 = bonus_reb20_setting
+                            else:
+                                bonus_reb_20p_last3 = 0                     
 
-                            fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + dd_last3 + td_last3, 1)
+                            fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + fgm_last3 + fgmi_last3 + ftm_last3 + ftmi_last3 + threes_last3 + dd_last3 + td_last3 + bonus_pt_40p_last3 + bonus_pt_50p_last3 + bonus_ast_15p_last3 + bonus_reb_20p_last3, 1)
                             
                             percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
                             if percentdiff < 0:
@@ -208,7 +317,7 @@ for league in leagues:
                             else:
                                 change = 'higher'
 
-                            if (percentdiff > 20 and fantasypoints > good_game_alert_fantasy_points and player[1] != 'prospect') or (fantasypoints > huge_game_alert_fantasy_points) or (fplast3 > prospect_alert_fantasy_points and fantasypoints > prospect_alert_fantasy_points and minutes > 24 and player[1] == 'prospect'):
+                            if (percentdiff > 20 and fantasypoints > good_game_alert_fantasy_points and player[1] != 'prospect') or (fantasypoints > huge_game_alert_fantasy_points) or (fplast3 > prospect_alert_fantasy_points and fantasypoints > prospect_alert_fantasy_points and minutes > 24 and player[1] == 'prospect') or (fantasypoints > prospect_alert_fantasy_points and minutes > 28 and player[1] == 'prospect'):
                                 fantasypointsstr = str(fantasypoints)
                                 percentdiffstr = str(percentdiff)
                                 gamesplayedstr = str(gamesplayed)
