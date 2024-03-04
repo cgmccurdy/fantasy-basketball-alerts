@@ -1,9 +1,10 @@
-# Enter your Sleeper username and IFTTT Key below
+# Enter your Sleeper username, Discord webhook URL, and Ball Don't Lie API key below
 # Set time_offset to 0 for ET, 1 for CT, 2 for MT, 3 for PT
 # Set ir_notifcations to True to receive notifications for players in IR slots
 
 user_name = 'enter_username'
-IFTTT = 'enter_IFTTT_key'
+webhook_url = 'enter_webhook_url'
+balldontlie_api_key = 'enter_api_key'
 time_offset = 1
 ir_notifcations = False
 prospect_alert_fantasy_points = 18
@@ -20,15 +21,8 @@ from dotenv import load_dotenv, find_dotenv
 if user_name == 'enter_username':
     load_dotenv(find_dotenv())
     user_name = os.getenv('sleeper_username')
-    IFTTT = os.getenv('IFTTT_key')
-    
-
-def ifttt(first, second, third):
-    report = {}
-    report["value1"] = first
-    report["value2"] = second
-    report["value3"] = third
-    requests.post("https://maker.ifttt.com/trigger/sleeper_alert/with/key/"+IFTTT, data=report) 
+    webhook_url = os.getenv('discord_webhook_url')
+    balldontlie_api_key = os.getenv('ball_dont_lie_api')
 
 today = date.today()
 today_str = str(today)
@@ -61,7 +55,7 @@ yesterdaydata = leaguedashplayerstats.LeagueDashPlayerStats(season=Season.curren
 yesterdayobject = json.loads(yesterdaydata)
 yesterdaystats = yesterdayobject['LeagueDashPlayerStats']
 
-gamesdata = requests.get("https://www.balldontlie.io/api/v1/games?start_date="+today_str+"&end_date="+today_str).json()
+gamesdata = requests.get("https://api.balldontlie.io/v1/games?start_date="+today_str+"&end_date="+today_str, headers={"Authorization": balldontlie_api_key}).json()
 games = gamesdata['data']
 
 seasonstatus = requests.get("https://api.sleeper.app/v1/state/nba").json()
@@ -70,7 +64,7 @@ week = str(seasonstatus['week'])
 
 user = requests.get("https://api.sleeper.app/v1/user/"+user_name).json()
 userid = user['user_id']
-avatar = 'https://sleepercdn.com/avatars/'+user['avatar']
+user_avatar = 'https://sleepercdn.com/avatars/'+user['avatar']
 
 trendingdata = requests.get("https://api.sleeper.app/v1/players/nba/trending/add?lookback_hours=12&limit=100").json()
 
@@ -79,6 +73,7 @@ leagues = requests.get("https://api.sleeper.app/v1/user/"+userid+"/leagues/nba/"
 for league in leagues:
     leagueid = league['league_id']
     leaguename = league['name']
+    league_avatar = 'https://sleepercdn.com/avatars/'+league['avatar']
     scoring_settings = league['scoring_settings']
     try:
         pts_setting = scoring_settings['pts']
@@ -158,6 +153,7 @@ for league in leagues:
         bonus_ast15_setting = 0
 
     leagueusers = requests.get("https://api.sleeper.app/v1/league/"+leagueid+"/users").json()
+    print(leagueusers)
 
     leaguerosters = requests.get("https://api.sleeper.app/v1/league/"+leagueid+"/rosters").json()
     all_rostered = []
@@ -178,10 +174,10 @@ for league in leagues:
         for player in current_roster:
             all_rostered.append(player)
 
-    prospects = []
+    trending = []
     for player in trendingdata:
         if player['player_id'] not in all_rostered:
-            prospects.append(player['player_id'])
+            trending.append(player['player_id'])
 
     leaguematchups = requests.get("https://api.sleeper.app/v1/league/"+leagueid+"/matchups/"+week).json()
     for matchup in leaguematchups:
@@ -194,13 +190,26 @@ for league in leagues:
     for rosters in leaguerosters:
         if opponent_roster_id == rosters['roster_id']:
             opponent_user_id = rosters['owner_id']
-    for users in leagueusers:
-        if opponent_user_id == users['user_id']:
-            opponent_team_name = users['display_name']
+    for user in leagueusers:
+        if userid == user['user_id']:
+            try:
+                team_name = user['metadata']['team_name']
+            except:
+                team_name = user['display_name']
+        if opponent_user_id == user['user_id']:
+            try:
+                opponent_team_name = user['metadata']['team_name']
+            except:
+                opponent_team_name = user['display_name']
+            if "https://" in user['avatar']:
+                opponent_avatar = user['avatar']
+            else:
+                opponent_avatar = 'https://sleepercdn.com/avatars/'+user['avatar']
 
     os.chdir(path)
     f = open('playercache.json')
     data = json.load(f)
+
     player_names = []
     reserve_players = []
     for player in roster:
@@ -230,12 +239,18 @@ for league in leagues:
             player_name.append(name)
             player_name.append('opponent')
             player_names.append(player_name)
-    for player in prospects:
+    for player in trending:
         player_name = []
         name = (data[player]['full_name'])
         player_name.append(name)
         player_name.append('prospect')
         player_names.append(player_name)
+
+    big_games = []
+    opponent_big_games = []
+    prospects = []
+    bench = []
+
     for player in player_names:
         player_name = player[0]
         search = players.find_players_by_full_name(player_name)
@@ -311,7 +326,7 @@ for league in leagues:
 
                             fplast3 = round(pts_last3 + ast_last3 + reb_last3 + stl_last3 + blk_last3 + to_last3 + fgm_last3 + fgmi_last3 + ftm_last3 + ftmi_last3 + threes_last3 + dd_last3 + td_last3 + bonus_pt_40p_last3 + bonus_pt_50p_last3 + bonus_ast_15p_last3 + bonus_reb_20p_last3, 1)
                             
-                            percentdiff = round((fantasypoints - fplast3) / fplast3 * 100, 1)
+                            percentdiff = int(round((fantasypoints - fplast3) / fplast3 * 100, 0))
                             if percentdiff < 0:
                                 change = 'lower'
                             else:
@@ -324,17 +339,33 @@ for league in leagues:
                                 fplast3str = str(fplast3)
                                 minutestr = str(minutes)
 
-                                if player[1] == 'myteam' and len(player) == 2:
-                                    alert = f'Great game from {player_name} with {fantasypointsstr} points! {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}.'
-                                elif player[1] == 'myteam':
-                                    alert = f'Great game from {player[2]} with {fantasypointsstr} points! {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}.'
+                                alert = {}
+                                empty_alert = {'name':'\a','value':'\u200b'}
+
+                                if player[1] == 'myteam':
+                                    if len(player) == 3:
+                                        player_name = player[2]
+                                    alert_string = f'- {fantasypointsstr} points\n- {percentdiffstr}% {change} than last {gamesplayedstr} game avg of {fplast3str}'
+                                    alert["name"] = player_name
+                                    alert["value"] = alert_string
+                                    big_games.append(empty_alert)
+                                    big_games.append(alert)
+
                                 elif player[1] == 'opponent':
-                                    alert = f"Oof! {player_name} on {opponent_team_name}'s team dropped {fantasypointsstr} points. {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str}."
-                                elif player[1] == 'prospect':
-                                    alert = f"{player_name} is trending and dropped {fantasypointsstr} points. {percentdiffstr}% {change} than his last {gamesplayedstr} game average of {fplast3str} playing {minutestr} MPG."
+                                    alert_string = f"- {fantasypointsstr} points\n- {percentdiffstr}% {change} than last {gamesplayedstr} game avg of {fplast3str}"
+                                    alert["name"] = player_name
+                                    alert["value"] = alert_string
+                                    opponent_big_games.append(empty_alert)
+                                    opponent_big_games.append(alert)
                                 
+                                elif player[1] == 'prospect':
+                                    alert_string = f"- {fantasypointsstr} points\n- {minutestr} MPG\n- {percentdiffstr}% {change} than last {gamesplayedstr} game avg of {fplast3str}"
+                                    alert["name"] = player_name
+                                    alert["value"] = alert_string
+                                    prospects.append(empty_alert)
+                                    prospects.append(alert)
+
                                 print(alert)
-                                ifttt(alert, leaguename, avatar)
 
                             else:
                                 print(player_name+' done')
@@ -346,16 +377,39 @@ for league in leagues:
     for player in reserve_players:
         for game in games:
             if player[1] == game['home_team']['abbreviation'] or player[1] == game['visitor_team']['abbreviation']:
-                gamestart_utc = game['status']
-                stamp = datetime.strptime(gamestart_utc, '%Y-%m-%dT%H:%M:%SZ')
-                final_time = stamp - timedelta(hours=time_offset+4)
-                gamestart = final_time.strftime("%I:%M %p")
-                if gamestart[0] == '0':
-                    gamestartfinal = gamestart[1:]
-                else:
-                    gamestartfinal = gamestart
-                
-                alert = f'{player[0]} is on the bench and has a game today at {gamestartfinal}.'
+                if game['period'] == 0:
+                    gamestart_utc = game['status']
+                    stamp = datetime.strptime(gamestart_utc, '%Y-%m-%dT%H:%M:%SZ')
+                    final_time = stamp - timedelta(hours=time_offset+3)
+                    gamestart = final_time.strftime("%I:%M %p")
+                    if gamestart[0] == '0':
+                        gamestartfinal = gamestart[1:]
+                    else:
+                        gamestartfinal = gamestart
+                    
+                    alert = {}
+                    alert_string = f'Game today at {gamestartfinal}'
+                    player_name = player[0]
+                    alert["name"] = player_name
+                    alert["value"] = alert_string
+                    bench.append(empty_alert)
+                    bench.append(alert)
 
-                print(alert)
-                ifttt(alert, leaguename, avatar)
+                    print(alert)
+
+    big_game_dict = {'author':{'name':'\a', 'icon_url':user_avatar}, 'title':'__**'+team_name+'**__', 'color':2281805, 'fields':big_games}
+    opponent_big_games_dict = {'author':{'name':'\a', 'icon_url':opponent_avatar}, 'title':'__**'+opponent_team_name+'**__', 'color':13705777, 'fields':opponent_big_games}
+    prospects_dict = {'title':'__**Prospects**__', 'color':8921809, 'fields':prospects}
+    bench_dict = {'title':'__**Bench**__', 'color':13746722, 'fields':bench}
+
+    embeds = [big_game_dict, opponent_big_games_dict, prospects_dict, bench_dict]
+    report = {}
+    report["username"] = leaguename
+    report["avatar_url"] = league_avatar
+    report["embeds"] = embeds
+    result = requests.post(webhook_url, json=report)
+
+    if 200 <= result.status_code < 300:
+        print(f"Webhook sent {result.status_code}")
+    else:
+        print(f"Not sent with {result.status_code}, response:\n{result.json()}")
