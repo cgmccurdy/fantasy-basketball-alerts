@@ -2,7 +2,7 @@
 
 Works with Sleeper. Enter your Sleeper username and Discord webhook URL in the python file.  
 
-To get a Discord webhook URL, go to Server Settings, Integrations, and Create Webhook:
+To get a Discord webhook URL, go to Server Settings, Integrations, and Create Webhook:  
 https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
 
 Alerts will generate for:  
